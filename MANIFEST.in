@@ -1,0 +1,3 @@
+recursive-include src/crosci *.c
+recursive-include src/crosci *.pyx
+include LICENSE.txt

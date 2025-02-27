@@ -1,0 +1,45 @@
+[project]
+name = "crosci"
+version = "0.1.0"
+description = "Biomarkers of Critical Oscillations"
+authors = [
+    { name = "Richard Hardstone", email = "richard.hardstone@gmail.com" },
+    { name = "Arthur-Ervin Avramiea", email = "a.e.avramiea@vu.nl" },
+    { name = "Marina Diachenko", email = "dsgvmarina@gmail.com" },
+    { name = "Emre Cebi", email = "emre@cebi.io" },
+]
+readme = "README.md"
+license = { file = "LICENSE.txt" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Cython",
+    "Programming Language :: C",
+    "Topic :: Scientific/Engineering",
+]
+requires-python = ">=3.11"
+dependencies = [
+    "cython>=3.0.12, <3.1",
+    "joblib>=1.4.2, <2",
+    "mne>=1.9.0, <2",
+    "numpy>=2,<3",
+    "scipy>=1.15.2",
+    "setuptools[core]>=75.8.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/arthur-ervin/crosci"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[build-system]
+requires = ["setuptools", "cython"]
+build-backend = "setuptools.build_meta"
+
+[dependency-groups]
+dev = ["pre-commit>=4.1.0", "ruff>=0.9.7"]

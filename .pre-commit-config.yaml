@@ -1,0 +1,14 @@
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.4
+    hooks:
+      - id: ruff
+        args: ["--fix"]
+        exclude: ^(data|doc|external|pipeline|tmp|tutorials)/
+      - id: ruff-format
+        exclude: ^(data|doc|external|pipeline|tmp|tutorials)/
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    # uv version.
+    rev: 0.6.2
+    hooks:
+      - id: uv-lock
