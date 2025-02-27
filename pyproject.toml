@@ -1,6 +1,5 @@
 [project]
 name = "crosci"
-version = "0.1.0"
 description = "Biomarkers of Critical Oscillations"
 authors = [
     { name = "Richard Hardstone", email = "richard.hardstone@gmail.com" },
@@ -22,14 +21,10 @@ classifiers = [
     "Topic :: Scientific/Engineering",
 ]
 requires-python = ">=3.11"
-dependencies = [
-    "cython>=3.0.12, <3.1",
-    "joblib>=1.4.2, <2",
-    "mne>=1.9.0, <2",
-    "numpy>=2,<3",
-    "scipy>=1.15.2",
-    "setuptools[core]>=75.8.0",
-]
+dependencies = ["cython", "joblib", "mne", "numpy", "scipy"]
+dynamic = ["version"]
+
+[tool.setuptools_scm]
 
 [project.urls]
 Homepage = "https://github.com/arthur-ervin/crosci"
@@ -38,7 +33,7 @@ Homepage = "https://github.com/arthur-ervin/crosci"
 package-dir = { "" = "src" }
 
 [build-system]
-requires = ["setuptools", "cython"]
+requires = ["setuptools", "cython", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [dependency-groups]
