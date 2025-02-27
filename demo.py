@@ -8,6 +8,8 @@ from crosci.biomarkers import (
     compute_spectrum_biomarkers,
     compute_band_biomarkers,
     get_frequency_bins,
+    DFA,
+    fEI,
 )
 from matplotlib import pyplot as plt
 from time import time
@@ -33,6 +35,37 @@ def generate_signal_and_run(runtime="c"):
     num_channels = 128
     signal = np.random.rand(num_channels, num_seconds * sampling_frequency)
 
+    ##################################################################
+    ########### 1. BIOMARKER COMPUTATION ON AMPLITUDE ENVELOPE
+    # assume we already have amplitude envelope of band-filtered signal
+    amplitude_envelope = signal
+    DFA_fit_interval_seconds = [5, 30]
+    DFA_compute_interval_seconds = [5, 30]
+    DFA_overlap = True  # 50% overlap
+    (DFA_array, window_sizes, fluctuations, DFA_intercept) = DFA(
+        amplitude_envelope,
+        sampling_frequency,
+        DFA_fit_interval_seconds,
+        DFA_compute_interval_seconds,
+        overlap=DFA_overlap,
+        runtime=runtime,
+    )
+    fEI_window_size_sec = 5
+    fEI_window_overlap = 0.8
+    (fEI_outliers_removed, fEI_val, num_outliers, wAmp, wDNF) = fEI(
+        amplitude_envelope,
+        sampling_frequency,
+        fEI_window_size_sec,
+        fEI_window_overlap,
+        DFA_array,
+        runtime=runtime,
+    )
+    print("DFA array for amplitude envelope", DFA_array)
+    print("fEI array for amplitude envelope", fEI_outliers_removed)
+
+    ##################################################################
+    ########### 2. BIOMARKER COMPUTATION IN ONE FREQUENCY BAND
+    # signal will be filtered in specified frequency band
     frequency_range = [8, 16]
     # compute DFA and fEI across the spectrum
     biomarkers = compute_band_biomarkers(
@@ -43,6 +76,9 @@ def generate_signal_and_run(runtime="c"):
     print("DFA array for frequency range", frequency_range, DFA_array)
     print("fEI array for frequency range", frequency_range, fEI_array)
 
+    ##################################################################
+    ########### 3. BIOMARKER COMPUTATION ACROSS THE FREQUENCY SPECTRUM
+    #
     spectrum_range = [1, 45]
     # compute DFA and fEI across the spectrum
     biomarkers = compute_spectrum_biomarkers(
@@ -51,7 +87,7 @@ def generate_signal_and_run(runtime="c"):
     DFA_matrix = biomarkers["DFA"]
     fEI_matrix = biomarkers["fEI"]
 
-    ############# PLOTTING OF RESULTS
+    # PLOTTING OF RESULTS
     # idx of channel to plot
     chan_to_plot = 0
 
@@ -87,9 +123,9 @@ if __name__ == "__main__":
     generate_signal_and_run(runtime="c")
     end_cpython = time()
 
-    start_python_only = time()
+    start_python = time()
     generate_signal_and_run(runtime="python")
-    end_python_only = time()
+    end_python = time()
 
-    print("time cpython", end_cpython - start_cpython)
-    print("time python only", end_python_only - start_python_only)
+    print("time cpython runtime", end_cpython - start_cpython)
+    print("time python runtime", end_python - start_python)
