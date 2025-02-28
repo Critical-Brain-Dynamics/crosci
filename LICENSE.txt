@@ -1,10 +1,9 @@
-License
+ACADEMIC PUBLIC LICENSE
 
 The following license governs the use of this software in academic and educational environments.
 Please note that commercial use of the fEI algorithm is protected by Patent claim (PCT/NL2019/050167) .Method of determining brain activity.; with priority date 16 March 2018
 For commercial use contact k.linkenkaerhansen@vu.nl
 
-ACADEMIC PUBLIC LICENSE
 
 Copyright (C) 2019 CoBrALab and Gabriel Desrosiers-Gregoire and Gabriel A. Devenyi and Mallar Chakravarty
 
