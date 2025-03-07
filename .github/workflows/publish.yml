@@ -2,9 +2,6 @@ name: Publish
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
   release:
     types: [published]
 
@@ -37,10 +34,15 @@ jobs:
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    env:
+      CIBW_BEFORE_BUILD: >-
+        rm -rf {package}/build
+      CIBW_BEFORE_BUILD_MACOS: >-
+        brew install libomp
+      CIBW_SKIP: "*-musllinux_aarch64"
     strategy:
       matrix:
-        # macos-13 is an intel runner, macos-14 is apple silicon
-        os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, macos-13, macos-14, macos-15]
+        os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, macos-13, macos-14]
         
     steps:
       - name: Checkout repository
@@ -53,11 +55,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version-file: ".python-version"
-
-      - name: "OS spesific depend"
-        uses: carlkidcrypto/os-specific-runner@v2.0.0
-        with:
-          macos: brew install libomp
       
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.22.0
