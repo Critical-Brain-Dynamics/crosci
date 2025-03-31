@@ -82,15 +82,15 @@ def fEI(
     num_windows = np.shape(all_window_index)[0]
 
     fEI_val = np.zeros((num_chans, 1))
-    fEI_val[:] = np.NAN
+    fEI_val[:] = np.nan
     fEI_outliers_removed = np.zeros((num_chans, 1))
-    fEI_outliers_removed[:] = np.NAN
+    fEI_outliers_removed[:] = np.nan
     num_outliers = np.zeros((num_chans, 1))
-    num_outliers[:] = np.NAN
+    num_outliers[:] = np.nan
     wAmp = np.zeros((num_chans, num_windows))
-    wAmp[:] = np.NAN
+    wAmp[:] = np.nan
     wDNF = np.zeros((num_chans, num_windows))
-    wDNF[:] = np.NAN
+    wDNF[:] = np.nan
 
     for ch_idx in range(num_chans):
         if channels_to_ignore[ch_idx]:
@@ -234,11 +234,11 @@ def DFA(
     ]
 
     dfa_array = np.zeros(num_chans)
-    dfa_array[:] = np.NAN
+    dfa_array[:] = np.nan
     dfa_intercept = np.zeros(num_chans)
-    dfa_intercept[:] = np.NAN
+    dfa_intercept[:] = np.nan
     fluctuations = np.zeros((num_chans, len(window_sizes)))
-    fluctuations[:] = np.NAN
+    fluctuations[:] = np.nan
 
     if max(window_sizes) <= num_timepoints:
         for ch_idx in range(num_chans):
