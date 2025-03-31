@@ -156,8 +156,8 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "pre-commit", specifier = ">=4.1.0" },
-    { name = "ruff", specifier = ">=0.9.7" },
+    { name = "pre-commit" },
+    { name = "ruff" },
 ]
 
 [[package]]
