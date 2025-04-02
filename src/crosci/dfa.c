@@ -72,8 +72,10 @@ double sumOfSquaredErrors(double* x, double* y, int n, double m, double c)
     return sum;
 }
 
-void main()
-{}
+int main()
+{
+    return 0;
+}
 
 /* Detrended fluctuation analysis
     seq:	input data array
@@ -86,7 +88,6 @@ void main()
 double* dfa(double* seq, long npts, long* rs, int nr, double overlap_perc)
 {
     long i, boxsize, inc, j;
-    double stat;
 
     // write cumulative sum
     for (i = 1; i < npts; i++)
@@ -105,7 +106,8 @@ double* dfa(double* seq, long npts, long* rs, int nr, double overlap_perc)
     }
 
     int num_W = 0;
-    double m, c, sse;
+    double local_mse = 0.0;
+    BestFitResult bestFitResult;
 
     for (i = 0; i < nr; i++)
     {
@@ -120,19 +122,8 @@ double* dfa(double* seq, long npts, long* rs, int nr, double overlap_perc)
         }
 
         num_W = 0;
-        double local_mse = 0.0;
-        BestFitResult bestFitResult;
+        local_mse = 0.0;
 
-        ////      Peng's formula
-        //        #pragma omp parallel for reduction(+:local_mse, num_W) private(bestFitResult)
-        //        for (j = 0; j < npts - boxsize; j += inc){
-        //            bestFitResult = bestFit(x, seq + j, boxsize);
-        //            local_mse += sumOfSquaredErrors(x, seq + j, boxsize, bestFitResult.m, bestFitResult.c)/boxsize;
-        //            num_W++;
-        //        }
-        //        mse[i] = sqrt(local_mse/num_W);
-
-        //      Richard's formula
 #pragma omp parallel for reduction(+ : local_mse, num_W) private(bestFitResult)
         for (j = 0; j < npts - boxsize; j += inc)
         {

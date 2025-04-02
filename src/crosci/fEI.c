@@ -17,8 +17,10 @@ typedef struct
 
 double* cumsum; /* cumulative sum of signal */
 
-void main()
-{}
+int main()
+{
+    return 0;
+}
 
 // function to find the sum of a given array
 double sum(double* arr, int n)
@@ -88,7 +90,6 @@ double sumOfSquaredErrors(double* x, double* y, int n, double m, double c)
 double* fEI(double* seq, long npts, long boxsize, double overlap)
 {
     long i, inc, j;
-    double stat;
     double mean_sig;
 
     if (overlap > 0)
