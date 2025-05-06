@@ -27,7 +27,7 @@ dynamic = ["version"]
 [tool.setuptools_scm]
 
 [project.urls]
-Homepage = "https://github.com/arthur-ervin/crosci"
+Homepage = "https://github.com/Critical-Brain-Dynamics/crosci"
 
 [tool.setuptools]
 package-dir = { "" = "src" }
@@ -38,3 +38,6 @@ build-backend = "setuptools.build_meta"
 
 [dependency-groups]
 dev = ["pre-commit", "ruff"]
+
+[tool.ruff.lint]
+extend-select = ["I"]

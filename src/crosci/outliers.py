@@ -1,7 +1,7 @@
 # code adapted from PyAstronomy.pyasl.asl.outlier.generalizedESD, licensed under the MIT license https://opensource.org/license/mit
-from scipy.stats import t
 import numpy as np
 import numpy.ma as ma
+from scipy.stats import t
 
 
 def generalizedESD(x, maxOLs, alpha=0.05, fullOutput=False, ubvar=False):

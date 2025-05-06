@@ -1,17 +1,18 @@
 # This file is part of crosci, licensed under the Academic Public License.
 # See LICENSE.txt for more details.
 
+import multiprocessing
+
+import mne
 import numpy as np
+from joblib import Parallel, delayed
+from mne.filter import next_fast_len
 from numpy.matlib import repmat
-from .run_DFA import run_DFA
-from .run_fEI import run_fEI
+from scipy.signal import hilbert
 
 from .outliers import generalizedESD
-import multiprocessing
-import mne
-from mne.filter import next_fast_len
-from scipy.signal import hilbert
-from joblib import Parallel, delayed
+from .run_DFA import run_DFA
+from .run_fEI import run_fEI
 
 
 def fEI(

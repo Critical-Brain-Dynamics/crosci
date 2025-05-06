@@ -2,17 +2,18 @@
 # See LICENSE.txt for more details.
 
 import os
+from time import time
 
 import numpy as np
-from crosci.biomarkers import (
-    compute_spectrum_biomarkers,
-    compute_band_biomarkers,
-    get_frequency_bins,
-    DFA,
-    fEI,
-)
 from matplotlib import pyplot as plt
-from time import time
+
+from crosci.biomarkers import (
+    DFA,
+    compute_band_biomarkers,
+    compute_spectrum_biomarkers,
+    fEI,
+    get_frequency_bins,
+)
 
 # Get the full path of the current script
 script_path = os.path.abspath(__file__)
