@@ -1,11 +1,11 @@
 # This file is part of crosci, licensed under the Academic Public License.
 # See LICENSE.txt for more details.
 
-from setuptools import setup, Extension
-from Cython.Build import cythonize
 import os
 import platform
 
+from Cython.Build import cythonize
+from setuptools import Extension, setup
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
