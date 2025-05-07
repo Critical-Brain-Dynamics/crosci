@@ -12,8 +12,8 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 os_name = platform.system()
 processor_name = platform.processor()
 
-LIBOMP_PATH_ARM = "/opt/homebrew/opt/libomp"
-LIBOMP_PATH_X86 = "/usr/local/opt/libomp"
+LIBOMP_PATH_ARM = "/usr/local"
+LIBOMP_PATH_X86 = "/usr/local"
 
 if os_name == "Windows":
     extra_compile_args = ["/openmp"]

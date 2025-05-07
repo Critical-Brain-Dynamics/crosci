@@ -37,8 +37,14 @@ jobs:
     env:
       CIBW_BEFORE_BUILD: >-
         rm -rf {package}/build
-      CIBW_BEFORE_BUILD_MACOS: >-
-        brew install libomp
+      CIBW_BEFORE_ALL_MACOS: >-
+        git clone https://github.com/llvm/llvm-project.git &&
+        cd llvm-project/openmp &&
+        mkdir build &&
+        cd build &&
+        cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ .. &&
+        make &&
+        sudo make install
       CIBW_SKIP: "*-musllinux_aarch64"
     strategy:
       matrix:
@@ -58,8 +64,6 @@ jobs:
       
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.22.0
-        env:
-          MACOSX_DEPLOYMENT_TARGET: 14.0
 
       - uses: actions/upload-artifact@v4
         with:
