@@ -12,14 +12,22 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 os_name = platform.system()
 processor_name = platform.processor()
 
-LIBOMP_PATH_ARM = "/usr/local"
-LIBOMP_PATH_X86 = "/usr/local"
+LIBOMP_PATH_ARM = "/opt/homebrew/opt/libomp"
+LIBOMP_PATH_X86 = "/usr/local/opt/libomp"
+LIBOMP_PATH_GITHUB = "/usr/local"
 
 if os_name == "Windows":
     extra_compile_args = ["/openmp"]
     extra_link_args = []
 elif os_name == "Darwin":
-    if processor_name == "arm":
+    if os.environ.get("LIBOMP_GITHUB") == "1":
+        extra_compile_args = [
+            "-Xpreprocessor",
+            "-fopenmp",
+            f"-I{LIBOMP_PATH_GITHUB}/include",
+        ]
+        extra_link_args = [f"-L{LIBOMP_PATH_GITHUB}/lib", "-lomp"]
+    elif processor_name == "arm":
         extra_compile_args = [
             "-Xpreprocessor",
             "-fopenmp",
