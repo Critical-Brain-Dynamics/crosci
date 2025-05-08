@@ -46,6 +46,8 @@ jobs:
         make &&
         sudo make install
       CIBW_SKIP: "*-musllinux_aarch64 *-musllinux_i686 *-musllinux_x86_64"
+      CIBW_ENVIRONMENT_MACOS: >
+        LIBOMP_GITHUB="1"
     strategy:
       matrix:
         os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, macos-13, macos-14, macos-latest]
