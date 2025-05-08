@@ -45,10 +45,10 @@ jobs:
         cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ .. &&
         make &&
         sudo make install
-      CIBW_SKIP: "*-musllinux_aarch64"
+      CIBW_SKIP: "*-musllinux_aarch64 *-musllinux_i686 *-musllinux_x86_64"
     strategy:
       matrix:
-        os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, macos-13, macos-14]
+        os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, macos-13, macos-14, macos-latest]
         
     steps:
       - name: Checkout repository
@@ -63,7 +63,7 @@ jobs:
           python-version-file: "pyproject.toml"
       
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.22.0
+        uses: pypa/cibuildwheel@v2.23.3
 
       - uses: actions/upload-artifact@v4
         with:
