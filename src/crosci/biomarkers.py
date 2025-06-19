@@ -7,7 +7,6 @@ import mne
 import numpy as np
 from joblib import Parallel, delayed
 from mne.filter import next_fast_len
-from numpy.matlib import repmat
 from scipy.signal import hilbert
 
 from .outliers import generalizedESD
@@ -111,7 +110,9 @@ def fEI(
             signal_profile = np.cumsum(original_amp - np.mean(original_amp))
             w_original_amp = np.mean(original_amp[all_window_index], axis=1)
 
-            x_amp = repmat(np.transpose(w_original_amp[np.newaxis, :]), 1, window_size)
+            x_amp = np.tile(
+                np.transpose(w_original_amp[np.newaxis, :]), (1, window_size)
+            )
             x_signal = signal_profile[all_window_index]
             x_signal = np.divide(x_signal, x_amp)
 
@@ -612,10 +613,10 @@ def _create_window_indices(length_signal, length_window, window_offset):
     num_windows = len(window_starts)
 
     one_window_index = np.arange(0, length_window)
-    all_window_index = repmat(one_window_index, num_windows, 1).astype(int)
+    all_window_index = np.tile(one_window_index, (num_windows, 1)).astype(int)
 
-    all_window_index = all_window_index + repmat(
-        np.transpose(window_starts[np.newaxis, :]), 1, length_window
+    all_window_index = all_window_index + np.tile(
+        np.transpose(window_starts[np.newaxis, :]), (1, length_window)
     ).astype(int)
 
     return all_window_index
