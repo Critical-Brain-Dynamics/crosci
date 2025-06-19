@@ -7,6 +7,10 @@ authors = [
     { name = "Marina Diachenko", email = "dsgvmarina@gmail.com" },
     { name = "Emre Cebi", email = "emre@cebi.io" },
 ]
+maintainers = [
+    { name = "Arthur-Ervin Avramiea", email = "a.e.avramiea@vu.nl" },
+    { name = "Emre Cebi", email = "emre@cebi.io" },
+]
 readme = "README.md"
 license-files = ["LICENSE.txt"]
 classifiers = [
@@ -21,7 +25,13 @@ classifiers = [
     "Topic :: Scientific/Engineering",
 ]
 requires-python = ">=3.11"
-dependencies = ["cython", "joblib", "mne", "numpy", "scipy"]
+dependencies = [
+    "cython",
+    "joblib",
+    "mne",
+    "numpy",
+    "scipy",
+]
 dynamic = ["version"]
 
 [tool.setuptools_scm]
