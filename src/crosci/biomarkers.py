@@ -534,7 +534,6 @@ def compute_band_biomarkers(
     """
 
     num_cores = multiprocessing.cpu_count()
-    num_channels, num_timepoints = np.shape(signal_matrix)
 
     output = {}
 
@@ -565,12 +564,15 @@ def compute_band_biomarkers(
     filtered_signal = filtered_signal[
         :, 1 * sampling_frequency : filtered_signal.shape[1] - 1 * sampling_frequency
     ]
+    num_channels, num_timepoints = np.shape(filtered_signal)
+
     # Compute amplitude envelope
     n_fft = next_fast_len(num_timepoints)
     amplitude_envelope = Parallel(n_jobs=num_cores, backend="threading", verbose=0)(
         delayed(hilbert)(filtered_signal[idx_channel, :], n_fft)
         for idx_channel in range(num_channels)
     )
+    amplitude_envelope = np.asarray(amplitude_envelope)[..., :num_timepoints] 
     amplitude_envelope = np.abs(np.array(amplitude_envelope))
 
     if "DFA" in biomarkers_to_compute or "fEI" in biomarkers_to_compute:
