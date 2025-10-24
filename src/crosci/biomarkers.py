@@ -572,7 +572,7 @@ def compute_band_biomarkers(
         delayed(hilbert)(filtered_signal[idx_channel, :], n_fft)
         for idx_channel in range(num_channels)
     )
-    amplitude_envelope = np.asarray(amplitude_envelope)[..., :num_timepoints] 
+    amplitude_envelope = np.asarray(amplitude_envelope)[..., :num_timepoints]
     amplitude_envelope = np.abs(np.array(amplitude_envelope))
 
     if "DFA" in biomarkers_to_compute or "fEI" in biomarkers_to_compute:
