@@ -91,7 +91,6 @@ jobs:
       url: https://pypi.org/p/crosci
     permissions:
       id-token: write
-    if: github.event_name == 'release'
     steps:
       - uses: actions/download-artifact@v7
         with:
