@@ -54,7 +54,7 @@ skip = "*-musllinux_aarch64 *-musllinux_i686 *-musllinux_x86_64"
 [tool.cibuildwheel.macos]
 environment = { LIBOMP_GITHUB = "1", MACOSX_DEPLOYMENT_TARGET = "10.9" }
 before-all = [
-    "LLVM_VER=19.1.7 && curl -sL https://github.com/llvm/llvm-project/releases/download/llvmorg-${LLVM_VER}/openmp-${LLVM_VER}.src.tar.xz | tar xJ && cd openmp-${LLVM_VER}.src && mkdir build && cd build && cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ .. && make && sudo make install",
+    "LLVM_VER=19.1.7 && rm -rf openmp-${LLVM_VER}.src cmake-${LLVM_VER}.src openmp.tar.xz cmake.tar.xz && curl -sL -o openmp.tar.xz https://github.com/llvm/llvm-project/releases/download/llvmorg-${LLVM_VER}/openmp-${LLVM_VER}.src.tar.xz && curl -sL -o cmake.tar.xz https://github.com/llvm/llvm-project/releases/download/llvmorg-${LLVM_VER}/cmake-${LLVM_VER}.src.tar.xz && tar xJf openmp.tar.xz && tar xJf cmake.tar.xz && cd openmp-${LLVM_VER}.src && mkdir -p build && cd build && cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_MODULE_PATH=$(pwd)/../../cmake-${LLVM_VER}.src/Modules .. && make && sudo make install",
 ]
 
 [tool.cibuildwheel.linux]
