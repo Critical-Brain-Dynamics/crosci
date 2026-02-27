@@ -54,13 +54,7 @@ skip = "*-musllinux_aarch64 *-musllinux_i686 *-musllinux_x86_64"
 [tool.cibuildwheel.macos]
 environment = { LIBOMP_GITHUB = "1", MACOSX_DEPLOYMENT_TARGET = "10.9" }
 before-all = [
-    "git clone https://github.com/llvm/llvm-project.git",
-    "cd llvm-project/openmp",
-    "mkdir build",
-    "cd build",
-    "cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..",
-    "make",
-    "sudo make install",
+    "LLVM_VER=19.1.7 && curl -sL https://github.com/llvm/llvm-project/releases/download/llvmorg-${LLVM_VER}/openmp-${LLVM_VER}.src.tar.xz | tar xJ && cd openmp-${LLVM_VER}.src && mkdir build && cd build && cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ .. && make && sudo make install",
 ]
 
 [tool.cibuildwheel.linux]
