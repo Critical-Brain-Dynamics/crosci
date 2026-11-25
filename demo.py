@@ -85,6 +85,8 @@ def generate_signal_and_run(runtime="c"):
     biomarkers = compute_spectrum_biomarkers(
         signal, sampling_frequency, spectrum_range, runtime=runtime
     )
+    absolute_power_db_matrix = biomarkers["absolute_power_db"]
+    relative_power_matrix = biomarkers["relative_power"]
     DFA_matrix = biomarkers["DFA"]
     fEI_matrix = biomarkers["fEI"]
 
@@ -105,18 +107,29 @@ def generate_signal_and_run(runtime="c"):
         )
     x_ticks = np.arange(len(frequency_bins))
 
-    fig, ax = plt.subplots(1, 2, figsize=(12, 5))
-    ax[0].plot(x_ticks, DFA_matrix[chan_to_plot, :])
+    fig, ax = plt.subplots(1, 4, figsize=(24, 5))
+    ax[0].plot(x_ticks, absolute_power_db_matrix[chan_to_plot, :])
     ax[0].set_xlabel("Frequency (Hz)")
-    ax[0].set_ylabel("DFA")
+    ax[0].set_ylabel("Absolute Power (dB)")
     ax[0].set_xticks(x_ticks, x_labels, rotation=45)
 
-    # note that fE/I will be NaN in this case, so nothing will be swhon
-    ax[1].plot(x_ticks, fEI_matrix[chan_to_plot, :])
+    ax[1].plot(x_ticks, relative_power_matrix[chan_to_plot, :])
     ax[1].set_xlabel("Frequency (Hz)")
-    ax[1].set_ylabel("fEI")
-    ax[1].set_xticklabels(x_labels)
+    ax[1].set_ylabel("Relative Power")
     ax[1].set_xticks(x_ticks, x_labels, rotation=45)
+    
+    ax[2].plot(x_ticks, DFA_matrix[chan_to_plot, :])
+    ax[2].set_xlabel("Frequency (Hz)")
+    ax[2].set_ylabel("DFA")
+    ax[2].set_xticks(x_ticks, x_labels, rotation=45)
+
+    # note that fE/I will be NaN in this case, so nothing will be swhon
+    ax[3].plot(x_ticks, fEI_matrix[chan_to_plot, :])
+    ax[3].set_xlabel("Frequency (Hz)")
+    ax[3].set_ylabel("fEI")
+    ax[3].set_xticklabels(x_labels)
+    ax[3].set_xticks(x_ticks, x_labels, rotation=45)
+    plt.show()
 
 
 if __name__ == "__main__":

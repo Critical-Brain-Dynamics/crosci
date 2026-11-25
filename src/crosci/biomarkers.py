@@ -424,6 +424,118 @@ def get_DFA_fitting_interval(frequency_interval):
     return fit_interval
 
 
+_POWER_BIOMARKERS = ("band_power", "absolute_power_db", "relative_power")
+
+
+def compute_power_biomarkers(
+    signal_matrix,
+    sampling_frequency,
+    spectrum_frequency_range,
+    bad_idxes=(),
+    biomarkers_to_compute=_POWER_BIOMARKERS,
+    n_fft_seconds=10.0,
+    scaling=1.0,
+):
+    """Compute power biomarkers across the same frequency bins as spectral DFA and fEI.
+
+    Parameters
+    ----------
+    signal_matrix : array, shape (n_channels, n_times)
+        The signal to compute power for.
+    sampling_frequency : float
+        The sample frequency in Hz.
+    spectrum_frequency_range : array, length 2
+        The frequency range used by get_frequency_bins, as in
+        compute_spectrum_biomarkers. Bounds must lie between 1 and 150 Hz
+        and must not exceed Nyquist.
+    bad_idxes : list[int]
+        The indices of bad channels. Their outputs will be NaN.
+    biomarkers_to_compute : list[str]
+        Options are band_power, absolute_power_db, and relative_power.
+        All three are computed by default.
+    n_fft_seconds : float
+        Welch segment duration in seconds, shortened for short recordings.
+        Default is 10 seconds, with 50% overlap and a Hamming window.
+    scaling : float
+        Amplitude scaling factor, applied to PSD as scaling**2. Default is 1.
+
+    Returns
+    -------
+    output : dict[str, array]
+        Requested biomarkers, each with shape (n_channels, n_frequency_bins).
+        band_power is linear power in squared scaled signal units.
+        absolute_power_db is 10*log10(band_power); zero power gives -inf.
+        relative_power is each band's fraction of summed power across the
+        generated frequency bins; zero total power gives NaN.
+    """
+    frequency_bins = get_frequency_bins(spectrum_frequency_range)
+    signal_matrix = np.asarray(signal_matrix, dtype=float)
+    if signal_matrix.ndim != 2 or signal_matrix.shape[1] < 2:
+        raise ValueError("Expected a channel-by-time array with at least two samples")
+    if not np.isfinite(sampling_frequency) or sampling_frequency <= 0:
+        raise ValueError("sampling_frequency must be positive and finite")
+    if not np.isfinite(n_fft_seconds) or n_fft_seconds <= 0:
+        raise ValueError("n_fft_seconds must be positive and finite")
+    if not np.isfinite(scaling) or scaling <= 0:
+        raise ValueError("scaling must be positive and finite")
+
+    bands = np.asarray(frequency_bins, dtype=float)
+    if (bands.ndim != 2 or bands.shape[1] != 2 or len(bands) == 0
+            or not np.all(np.isfinite(bands))
+            or np.any(bands[:, 0] < 0)
+            or np.any(bands[:, 0] >= bands[:, 1])
+            or np.any(bands[:, 1] > sampling_frequency / 2)):
+        raise ValueError("Frequency ranges must satisfy 0 <= low < high <= Nyquist")
+
+    good = np.ones(signal_matrix.shape[0], dtype=bool)
+    good[list(bad_idxes)] = False
+    output = {
+        name: np.full((signal_matrix.shape[0], len(bands)), np.nan)
+        for name in _POWER_BIOMARKERS if name in biomarkers_to_compute
+    }
+    if not np.any(good) or not output:
+        return output
+    if not np.all(np.isfinite(signal_matrix[good])):
+        raise ValueError("Power computation requires finite samples in good channels")
+
+    n_fft = min(int(round(n_fft_seconds * sampling_frequency)), signal_matrix.shape[1])
+    if n_fft < 2:
+        raise ValueError("Welch segment must contain at least two samples")
+    psd, freqs = mne.time_frequency.psd_array_welch(
+        signal_matrix[good], sfreq=sampling_frequency,
+        n_fft=n_fft, n_per_seg=n_fft, n_overlap=n_fft // 2,
+        window="hamming", average="mean", verbose=False,
+    )
+    psd = psd * scaling**2
+    width = freqs[1] - freqs[0]
+
+    # Sum the PSD within each frequency band to obtain linear power.
+    n_channels = np.count_nonzero(good)
+    n_bands = len(bands)
+    abs_lin = np.full((n_channels, n_bands), np.nan)
+    for b, (lo, hi) in enumerate(bands):
+        mask = (freqs >= lo) & (freqs < hi)
+        if not np.any(mask):
+            raise ValueError("Frequency range contains no Welch bins; increase n_fft_seconds")
+        abs_lin[:, b] = psd[:, mask].sum(axis=-1) * width
+
+    if "band_power" in biomarkers_to_compute:
+        output["band_power"][good] = abs_lin
+
+    if "absolute_power_db" in biomarkers_to_compute:
+        with np.errstate(divide="ignore"):
+            abs_db = 10.0 * np.log10(abs_lin)
+        output["absolute_power_db"][good] = abs_db
+
+    if "relative_power" in biomarkers_to_compute:
+        totals = np.nansum(abs_lin, axis=1, keepdims=True)
+        rel = np.full_like(abs_lin, np.nan)
+        valid = np.isfinite(totals[:, 0]) & (totals[:, 0] > 0)
+        rel[valid, :] = abs_lin[valid, :] / totals[valid]
+        output["relative_power"][good] = rel
+    return output
+
+
 def compute_spectrum_biomarkers(
     signal_matrix,
     sampling_frequency,
@@ -431,15 +543,17 @@ def compute_spectrum_biomarkers(
     overlap=True,
     runtime="c",
     bad_idxes=[],
-    biomarkers_to_compute=["fEI", "DFA"],
+    biomarkers_to_compute=["absolute_power_db", "relative_power","fEI", "DFA"],
+    n_fft_seconds=10.0,
+    scaling=1.0,
 ):
-    """Compute spectral DFA and fEI for the frequencies provided.
+    """Compute DFA, fEI, and power biomarkers for the frequencies provided.
     Parameters
     ----------
     signal_matrix : array, shape (n_channels,n_times)
-        The signal to compute DFA and fEI for.
+        The signal to compute biomarkers for.
     biomarkers_to_compute: list[str]
-        Contains the list of biomarkers to be computed. Options are DFA, fEI
+        Contains the list of biomarkers to be computed. Options are DFA, fEI, band_power, absolute_power_db, relative_power
         If fEI is mentioned, DFA is computed by default
     sampling_frequency : float
         The sample frequency in Hz.
@@ -456,12 +570,16 @@ def compute_spectrum_biomarkers(
         The indices of bad channels which will be ignored when DFA is computed. Will be NaNs.
         Default is empty list.
 
+    n_fft_seconds, scaling : optional
+        Welch segment duration and amplitude scale. See compute_power_biomarkers.
+        Only used for power biomarkers.
+
     Returns
     -------
-    dfa_exponents_matrix : array, shape (n_channels,n_frequency_bins)
-        Computed DFA exponents per frequency bin
-    fei_values_matrix : array, shape (n_channels,n_frequency_bins)
-        Computed fEI values per frequency bin
+    output : dict[str, array]
+        Requested biomarkers, each with shape (n_channels, n_frequency_bins).
+        fEI also includes DFA. Power outputs are band_power,
+        absolute_power_db, and relative_power; see compute_power_biomarkers.
     """
 
     num_channels, num_timepoints = np.shape(signal_matrix)
@@ -469,7 +587,18 @@ def compute_spectrum_biomarkers(
     frequency_bins = get_frequency_bins(spectrum_frequency_range)
 
     output = {}
-    if "DFA" or "fEI" in biomarkers_to_compute:
+    if any(name in biomarkers_to_compute for name in _POWER_BIOMARKERS):
+        output.update(compute_power_biomarkers(
+            signal_matrix, sampling_frequency, spectrum_frequency_range,
+            bad_idxes=bad_idxes, biomarkers_to_compute=biomarkers_to_compute,
+            n_fft_seconds=n_fft_seconds, scaling=scaling,
+        ))
+    envelope_biomarkers = [
+        name for name in biomarkers_to_compute if name in ("DFA", "fEI")
+    ]
+    if not envelope_biomarkers:
+        return output
+    if "DFA" in biomarkers_to_compute or "fEI" in biomarkers_to_compute:
         output["DFA"] = np.zeros((num_channels, len(frequency_bins)))
     if "fEI" in biomarkers_to_compute:
         output["fEI"] = np.zeros((num_channels, len(frequency_bins)))
@@ -482,7 +611,7 @@ def compute_spectrum_biomarkers(
             overlap=overlap,
             runtime=runtime,
             bad_idxes=bad_idxes,
-            biomarkers_to_compute=biomarkers_to_compute,
+            biomarkers_to_compute=envelope_biomarkers,
         )
         if "DFA" in biomarkers_to_compute or "fEI" in biomarkers_to_compute:
             output["DFA"][:, idx_frequency] = output_band["DFA"]
